@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>✨ Text to PowerPoint</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Segoe UI, Tahoma, Arial, sans-serif;
+        background: #3396d3;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 900px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin: "10px";
+      }
+      .header {
+        background: linear-gradient(135deg, #ee5a52, #9cafaa);
+        color: #fff;
+        padding: 28px 32px;
+      }
+      .header h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+      }
+      .header p {
+        margin: 0;
+        opacity: 0.9;
+      }
+      .body {
+        padding: 28px 32px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin: 16px 0 8px;
+        color: #333;
+      }
+      textarea,
+      input,
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+      }
+      textarea {
+        min-height: 160px;
+        resize: vertical;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 800px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .file {
+        background: #f8fafc;
+        border: 2px dashed #d1d5db;
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+      .btn {
+        margin-top: 18px;
+        width: 100%;
+        padding: 14px 18px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.35);
+      }
+      .status {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 10px;
+        display: none;
+        text-align: center;
+        font-weight: 600;
+      }
+      .status.loading {
+        display: block;
+        background: #e0f2fe;
+        color: #075985;
+        border: 1px solid #bae6fd;
+      }
+      .status.success {
+        display: block;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+      .status.error {
+        display: block;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+      .hint {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+      }
+      /* Navbar */
+      .navbar {
+        width: 100%;
+        background: #1f2937; /* dark gray */
+        color: #fff;
+        padding: 14px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+      }
+      .navbar h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .navbar .dev {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <h2>PPT Generator</h2>
+      <span class="dev">Sairaj Kasote (Developer)</span>
+    </nav>
+    <div class="card">
+      <div class="header">
+        <h1>✨ Text to PowerPoint</h1>
+        <p>
+          Turn text/markdown into a PPT that follows your template’s look & feel
+        </p>
+      </div>
+      <div class="body">
+        <form id="pptForm">
+          <label for="textInput">Your Text Content</label>
+          <textarea
+            id="textInput"
+            placeholder="Paste text or markdown... (we'll map it to slides)"
+            required
+          ></textarea>
+
+          <div class="row">
+            <div>
+              <label for="guidance">Guidance (optional)</label>
+              <input
+                id="guidance"
+                placeholder="e.g., investor pitch, technical, summary"
+              />
+            </div>
+            <div>
+              <label for="filename">Output Filename</label>
+              <input id="filename" placeholder="my-presentation" required />
+            </div>
+          </div>
+
+          <label for="templateFile"
+            >PowerPoint Template (.pptx/.potx) (optional)</label
+          >
+          <input
+            id="templateFile"
+            type="file"
+            accept=".pptx,.potx"
+            class="file"
+          />
+
+          <div class="row">
+            <div>
+              <label for="llmProvider">LLM Provider (optional)</label>
+              <select id="llmProvider">
+                <option value="">None (use local splitting)</option>
+                <option value="openai">OpenAI (GPT)</option>
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="gemini">Google (Gemini)</option>
+              </select>
+              <div class="hint">We never store your key.</div>
+            </div>
+            <div>
+              <label for="apiKey">API Key (optional)</label>
+              <input
+                id="apiKey"
+                type="password"
+                placeholder="Your API key"
+                autocomplete="off"
+              />
+              <div class="hint">Kept in memory during this request only.</div>
+            </div>
+          </div>
+
+          <label for="model">Model (optional)</label>
+          <input
+            id="model"
+            placeholder="e.g., gpt-4o-mini, claude-3-5-sonnet-latest, gemini-1.5-flash"
+          />
+
+          <button class="btn" type="submit">🚀 Generate Presentation</button>
+        </form>
+        <div id="status" class="status"></div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("pptForm");
+      const statusBox = document.getElementById("status");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        statusBox.className = "status loading";
+        statusBox.textContent = "Generating your presentation...";
+        const fd = new FormData();
+        fd.append("text_content", document.getElementById("textInput").value);
+        fd.append("guidance", document.getElementById("guidance").value);
+        fd.append(
+          "filename",
+          (document.getElementById("filename").value || "presentation").replace(
+            /[^a-z0-9_\-]/gi,
+            "_"
+          )
+        );
+        fd.append("llm_provider", document.getElementById("llmProvider").value);
+        fd.append("api_key", document.getElementById("apiKey").value);
+        fd.append("model", document.getElementById("model").value);
+        const tf = document.getElementById("templateFile").files[0];
+        if (tf) fd.append("template_file", tf);
+
+        try {
+          const res = await fetch("/generate-ppt", {
+            method: "POST",
+            body: fd,
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download =
+            (
+              document.getElementById("filename").value || "presentation"
+            ).replace(/[^a-z0-9_\-]/gi, "_") + ".pptx";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          statusBox.className = "status success";
+          statusBox.textContent = "✅ Download complete!";
+        } catch (err) {
+          statusBox.className = "status error";
+          statusBox.textContent =
+            "❌ " + (err.message || "Something went wrong.");
+        }
+      });
+    </script>
+  </body>
+</html>
