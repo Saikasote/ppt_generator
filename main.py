@@ -11,7 +11,7 @@ from pptx.util import Inches, Pt
 from starlette.background import BackgroundTask
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(APP_DIR, "frontend")
+FRONTEND_DIR = APP_DIR  # use project root since no frontend folder
 
 app = FastAPI(title="Auto PPT Generator", version="1.0.0")
 
